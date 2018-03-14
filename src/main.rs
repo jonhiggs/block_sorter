@@ -11,8 +11,11 @@ use regex::Regex;
 // fn read_block() -> Vec(str) {
 // }
 
+fn has_chunks(d: &str) -> bool {
+    d.lines().count() == 1
+}
+
 fn chunks(d: &str) -> Vec<String> {
-    // let mut chunks: Vec<String> = Vec::new();
     let mut chunks: Vec<String> = vec![];
     let delimeter = Regex::new(r"^    .+").unwrap();
 
@@ -35,7 +38,7 @@ fn main() {
     io::stdin().read_to_string(&mut buffer);
 
     for c in chunks(&buffer) {
-        println!("chunk {}", c );
+        println!("{}", c );
     }
 
     process::exit(0);
@@ -63,5 +66,11 @@ mod tests {
             ");
             assert_eq!(chunks(data), ["line one\n    line two", "line three"]);
         }
+    }
+
+    fn test_has_chunks() {
+        assert_eq!(false, has_chunks("nope"));
+        assert_eq!(true,  has_chunks("something\n    somethingelse"));
+        assert_eq!(true,  has_chunks("    something\n    somethingelse"));
     }
 }
