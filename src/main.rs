@@ -12,7 +12,9 @@ use regex::Regex;
 // }
 
 fn has_chunks(d: &str) -> bool {
-    d.lines().count() == 1
+    Regex::new(r"\n    ")
+        .unwrap()
+        .is_match(d)
 }
 
 fn chunks(d: &str) -> Vec<String> {
@@ -38,7 +40,11 @@ fn main() {
     io::stdin().read_to_string(&mut buffer);
 
     for c in chunks(&buffer) {
-        println!("{}", c );
+        if has_chunks(&c) {
+            println!("{} has chunks", &c);
+        } else {
+            println!("{}", c );
+        }
     }
 
     process::exit(0);
@@ -68,8 +74,10 @@ mod tests {
         }
     }
 
+    #[test]
     fn test_has_chunks() {
         assert_eq!(false, has_chunks("nope"));
+        assert_eq!(false, has_chunks("one\ntwo\n"));
         assert_eq!(true,  has_chunks("something\n    somethingelse"));
         assert_eq!(true,  has_chunks("    something\n    somethingelse"));
     }
