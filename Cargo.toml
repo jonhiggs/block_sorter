@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Jon Higgs <jhiggs@eml.cc>"]
 
 [dependencies]
+indoc = "0.2"
+regex = "0.2"
