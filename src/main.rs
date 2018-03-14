@@ -39,11 +39,17 @@ fn main() {
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer);
 
-    for c in chunks(&buffer) {
-        if has_chunks(&c) {
-            println!("{} has chunks", &c);
-        } else {
-            println!("{}", c );
+    for data in chunks(&buffer) {
+        let mut d = 0;
+        let mut c = chunks(&data);
+
+        while has_chunks(&c) {
+            let c = chunks(&c);
+            let d = d + 1;
+        }
+
+        for i in c {
+            println!("{}", i );
         }
     }
 
