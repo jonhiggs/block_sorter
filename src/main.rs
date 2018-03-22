@@ -1,4 +1,4 @@
-#[macro_use]
+// #[macro_use]
 extern crate indoc;
 extern crate regex;
 
@@ -8,50 +8,56 @@ use std::io::{self, Read};
 use regex::Regex;
 
 
-// fn read_block() -> Vec(str) {
-// }
-
-fn has_chunks(d: &str) -> bool {
-    Regex::new(r"\n    ")
-        .unwrap()
-        .is_match(d)
+struct Chunk {
+    key: String,
+    data: String,
 }
 
-fn chunks(d: &str) -> Vec<String> {
-    let mut chunks: Vec<String> = vec![];
-    let delimeter = Regex::new(r"^    .+").unwrap();
+impl Chunk {
+    fn new(k: String, d: String) -> Chunk {
+      Chunk { key: k, data: d }
+    }
 
-    for line in d.lines() {
+    fn get_key(&self) -> &str {
+        &self.key
+    }
+
+    fn set_key(&mut self, data: &str) {
+        self.key = String::from(data);
+    }
+
+    fn push_data(&mut self, data: &str) {
+        self.key.push_str(data);
+    }
+}
+
+fn chunkify(raw: &str) -> Vec<Chunk> {
+    let delimeter = Regex::new(r"^    .+").unwrap();
+    let mut chunks: Vec<Chunk> = vec![];
+
+    let mut chunk = Chunk::new(String::from(""), String::from(""));
+
+    for line in raw.lines() {
         let l = String::from(line);
 
         if !delimeter.is_match(&l) {
-            chunks.push(l);
+            chunk.set_key(&l);
         } else {
-            let i = chunks.len() - 1;
-            chunks[i] = chunks[i].to_string() + "\n" + &l.to_string();
+            chunk.push_data("\n");
+            chunk.push_data(&l);
+            continue
         }
+        chunks.push(chunk);
     }
 
-    return chunks;
+    chunks
 }
 
 fn main() {
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer);
 
-    for data in chunks(&buffer) {
-        let mut d = 0;
-        let mut c = chunks(&data);
-
-        while has_chunks(&c) {
-            let c = chunks(&c);
-            let d = d + 1;
-        }
-
-        for i in c {
-            println!("{}", i );
-        }
-    }
+    chunkify(&buffer);
 
     process::exit(0);
 }
@@ -62,29 +68,31 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_chunks() {
-        {
-            let data = indoc!("
-                line one
-                line two
-            ");
-            assert_eq!(chunks(data), ["line one", "line two"]);
-        }
-        {
-            let data = indoc!("
-                line one
-                    line two
-                line three
-            ");
-            assert_eq!(chunks(data), ["line one\n    line two", "line three"]);
-        }
+    fn test_chunkify() {
+        let raw_data = String::from("line one\nline two");
+        //assert_eq!(chunkify(&raw_data).len(), 2);
+        assert_eq!(chunkify(&raw_data).first().unwrap().get_key(), "line one");
     }
 
     #[test]
-    fn test_has_chunks() {
-        assert_eq!(false, has_chunks("nope"));
-        assert_eq!(false, has_chunks("one\ntwo\n"));
-        assert_eq!(true,  has_chunks("something\n    somethingelse"));
-        assert_eq!(true,  has_chunks("    something\n    somethingelse"));
+    fn test_chunk() {
+        {
+            let chunk = Chunk::new(String::from("the_key"), String::from("the_data"));
+            assert_eq!(chunk.get_key(), "the_key");
+        }
     }
+
+    //        assert_eq!(chunk.data(), "line one\nline two");
+    //        assert_eq!(chunk.children().len(), 0);
+    //    }
+    //    {
+    //        let chunk = Chunk {
+    //            raw_data: String::from("line one\n    line two")
+    //        };
+
+    //        //assert_eq!(chunk.data(), "line one\n    line two");
+    //        assert_eq!(chunk.children().len(), 1);
+    //        //assert_eq!(chunk.children().first().unwrap().data(), "    line two");
+    //    }
+    //}
 }
